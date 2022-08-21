@@ -1,23 +1,25 @@
 import React, { useState } from "react";
-import Map from "./Map";
-import { Layers, TileLayer, VectorLayer } from "./Layers";
+import {NavLink, useSearchParams} from "react-router-dom";
+import Map from "./components/Map";
+import { Layers, TileLayer, VectorLayer } from "./components/Layers";
 import { Style, Icon } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
-import { osm, vector } from "./Source";
+import { osm, vector } from "./components/Source";
 import { fromLonLat, get } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
-import { Controls, FullScreenControl } from "./Controls";
-import FeatureStyles from "./Features/Styles";
+import { Controls, FullScreenControl } from "./components/Controls";
+import FeatureStyles from "./components/Features/Styles";
 
 import mapConfig from "./config.json";
 import "./App.css";
 
 const geojsonObject = mapConfig.geojsonObject;
-const geojsonObject2 = mapConfig.geojsonObject2;
-const markersLonLat = [mapConfig.kansasCityLonLat, mapConfig.blueSpringsLonLat];
+const markersLonLat = [mapConfig.montpellierLonLat];
 
 function addMarkers(lonLatArray) {
+  
+
   var iconStyle = new Style({
     image: new Icon({
       anchorXUnits: "fraction",
@@ -36,12 +38,14 @@ function addMarkers(lonLatArray) {
 }
 
 const App = () => {
+  const [searchParams] = useSearchParams();
+  const userName = searchParams.get("name");
+
   const [center, setCenter] = useState(mapConfig.center);
   const [zoom, setZoom] = useState(9);
 
   const [showLayer1, setShowLayer1] = useState(true);
-  const [showLayer2, setShowLayer2] = useState(true);
-  const [showMarker, setShowMarker] = useState(false);
+  const [showMarker, setShowMarker] = useState(true);
 
   const [features, setFeatures] = useState(addMarkers(markersLonLat));
 
@@ -60,16 +64,7 @@ const App = () => {
               style={FeatureStyles.MultiPolygon}
             />
           )}
-          {showLayer2 && (
-            <VectorLayer
-              source={vector({
-                features: new GeoJSON().readFeatures(geojsonObject2, {
-                  featureProjection: get("EPSG:3857"),
-                }),
-              })}
-              style={FeatureStyles.MultiPolygon}
-            />
-          )}
+
           {showMarker && <VectorLayer source={vector({ features })} />}
         </Layers>
         <Controls>
@@ -80,26 +75,26 @@ const App = () => {
         <input
           type="checkbox"
           checked={showLayer1}
+          id="marker1"
           onChange={(event) => setShowLayer1(event.target.checked)}
         />{" "}
-        Johnson County
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          checked={showLayer2}
-          onChange={(event) => setShowLayer2(event.target.checked)}
-        />{" "}
-        Wyandotte County
+        <label htmlFor="marker1">Mon Futur Travail</label>
       </div>
       <hr />
       <div>
         <input
           type="checkbox"
           checked={showMarker}
+          id="marker"
           onChange={(event) => setShowMarker(event.target.checked)}
         />{" "}
-        Show markers
+        <label htmlFor="marker">Mon Bureau (zoomer avec la molette de la souris)</label> 
+      </div>
+      <div className="center">
+      <p>Bienvenue {userName}</p>
+      <NavLink to="/">
+        <button className="button2">Déconnexion</button>
+      </NavLink>
       </div>
     </div>
   );
